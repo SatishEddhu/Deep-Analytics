@@ -50,6 +50,8 @@ digit_test.shape
 digit_test.label = r.randrange(10) # [0,9]
 # Vectorization NOT by default on basic data types.
 # Vectorization only in np.array from numpy package
+np.random.randint(0,10,10)
+
 
 digit_train1 = digit_train[[0,1]]
 digit_train1.to_csv("submission.csv")
