@@ -10,12 +10,12 @@ import os
 # Set logging level to info to see detailed log output
 tf.logging.set_verbosity(tf.logging.INFO)
 
-os.chdir("/home/algo/Algorithmica/objective perceptron")
+os.chdir("/home/algo/Algorithmica/tensorflow-builtin-estimators")
 os.getcwd()
 
 # Read the train data
 # hascolumns x1(float), x2(float), label(0/1)
-sample = pd.read_csv("train.csv")
+sample = pd.read_csv("train1.csv")
 sample.shape
 sample.info()
 
@@ -27,7 +27,8 @@ sb.swarmplot(x='x1', y='x2', data=sample, hue='label', size=10)
 # Preprocess input data
 def normalize(x) :    
     return ( (x - np.mean(x)) / (np.max(x) - np.min(x)) )
-    
+
+# function must return tensors
 def input_function(dataset, train=False):
     dataset.x1 = normalize(dataset.x1)
     dataset.x2 = normalize(dataset.x2)
@@ -43,7 +44,8 @@ feature_cols = [layers.real_valued_column(k) for k in FEATURES]
 
 classifier = learn.LinearClassifier(feature_columns=feature_cols,
                                     n_classes=2,
-                                    model_dir='/home/algo/Algorithmica/tmp')              
+                                    model_dir='/home/algo/Algorithmica/tmp')
+
 classifier.fit(input_fn = lambda: input_function(sample,True), steps=1000)
 
 classifier.weights_

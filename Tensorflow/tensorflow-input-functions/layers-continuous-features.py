@@ -1,4 +1,4 @@
-0from tensorflow.contrib import layers
+from tensorflow.contrib import layers
 import pandas as pd
 import tensorflow as tf
 
