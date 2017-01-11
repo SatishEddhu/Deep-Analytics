@@ -19,9 +19,11 @@ sample.info()
 
 x = learn.extract_pandas_data(sample[['x1','x2']])
 y = learn.extract_pandas_labels(sample[['label']])
-# The above code is equivalent to the below commented code
-# x = sample[['x1','x2']].as_matrix()
-# y = sample[['label']].as_matrix()
+# The above code is equivalent to the below commented python code
+# But the above 'learn' version is recommended since it can run on any device - CPU, GPU,
+# mobile, whereas the below python code will run only on CPU
+#    x = sample[['x1','x2']].as_matrix()
+#    y = sample[['label']].as_matrix()
 
 # Divide the input data into train and validation
 x_train,x_validate,y_train,y_validate = model_selection.train_test_split(x, y, test_size=0.2, random_state=100)

@@ -29,6 +29,7 @@ def normalize(x) :
     return ( (x - np.mean(x)) / (np.max(x) - np.min(x)) )
 
 # function must return tensors
+# input function must return featurecols and labels separately   
 def input_function(dataset, train=False):
     dataset.x1 = normalize(dataset.x1)
     dataset.x2 = normalize(dataset.x2)
