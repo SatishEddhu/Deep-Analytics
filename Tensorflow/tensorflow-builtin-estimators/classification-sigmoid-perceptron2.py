@@ -35,7 +35,8 @@ feature_cols = [layers.real_valued_column("", dimension=2)]
 #build the model configuration              
 classifier = learn.LinearClassifier(feature_columns=feature_cols,
                                             n_classes=2,
-                                            model_dir="/home/algo/Algorithmica/tmp")
+                                            model_dir="/home/algo/Algorithmica/tmp",
+                                            enable_centered_bias=False)
 
 #build the model
 classifier.fit(x=x_train, y=y_train, steps=1000)
@@ -49,6 +50,6 @@ for key in sorted(results):
     print "%s:%s" % (key, results[key])
     
 # Predict the outcome of test data using model
-test = np.array([[100.4,21.5,10.5,22.4],[200.1,26.1,2.7,26.7]])
+test = np.array([[60.4,21.5],[200.1,26.1],[50,62],[50,63],[70,37],[70,38]])
 predictions = classifier.predict(test)
 predictions

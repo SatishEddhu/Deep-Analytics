@@ -19,7 +19,7 @@ os.getcwd()
 sample = learn.datasets.base.load_csv_with_header(
         filename="train2.csv",
         target_dtype=np.int,
-        features_dtype=np.float32, target_column=-1)
+        features_dtype=np.float32, target_column=-1) # '-1' means last column
 
 type(sample)
 sample.data
@@ -32,9 +32,23 @@ type(sample.target)
 #feature_columns argument expects list of tensorflow feature types
 feature_cols = [layers.real_valued_column("", dimension=2)]
 
+# If n_classes > 2, it is multi-class classification. Although we are trying to learn about a 
+# single perceptron, LinearClassifier internally uses a layer of perceptrons to classify.
 classifier = learn.LinearClassifier(feature_columns=feature_cols,
-                                            n_classes=2,
-                                            model_dir="/home/algo/Algorithmica/tmp")
+                                            n_classes=2, # binary classificationi
+                                            model_dir="/home/algo/Algorithmica/tmp",
+                                            enable_centered_bias=False)
+# By default, enable_centered_bias is True
+
+# If enable_centered_bias = False, linear classifier equation is:
+#   f(x,y) = w_1*x  + w_2*y + bias = 0
+#   To predict, f(x,y) < 0 ==> [x,y] is Class 0, else [x,y] is Class 1
+
+# If enable_centered_bias = True, linear classifier equation is:
+#   f(x,y) = w_1*x  + w_2*y + bias + centered_bias_weight = 0
+#   To predict, f(x,y) < 0 ==> [x,y] is Class 0, else [x,y] is Class 1
+
+# Note that enabling/disabling the centered bias can result in different predictions for "border-case" points
 
 classifier.fit(x=sample.data, y=sample.target, steps=1000)
 
@@ -42,8 +56,11 @@ classifier.fit(x=sample.data, y=sample.target, steps=1000)
 classifier.weights_
 classifier.bias_
 
+# valid only when enable_centered_bias=True in learn.LinearClassifier()
+# centered_bias_weight = classifier.get_variable_value("centered_bias_weight")
+
 for var in classifier.get_variable_names():
-    print classifier.get_variable_value(var)
+    print var, " - ", classifier.get_variable_value(var)
     
 # w1*x + w2*y + b = 0.
 p1 = [0,-classifier.bias_[0]/classifier.weights_[1]] # (0, -b/w2)
@@ -54,6 +71,31 @@ sb.swarmplot(x='x1', y='x2', data=df, hue='label', size=10)
 plt.plot(p1, p2, 'b-', linewidth = 2)
 
 # predict the outcome using model                                  
-test = np.array([[100.4,21.5,10.5,22.4],[200.1,26.1,2.7,26.7]])
+test = np.array([[60.4,21.5],[200.1,26.1],[50,62],[50,63],[70,37],[70,38]])
 predictions = classifier.predict(test)
-predictions
+predictions # [0,1,0,1,0,1]
+
+test[0,0]
+test[0,1]
+
+# Understanding how the predictions were made
+# Since enable_centered_bias = False, linear classifier equation is:
+#   f(x,y) = w_1*x  + w_2*y + bias = 0
+#   To predict, f(x,y) < 0 ==> [x,y] is Class 0, else [x,y] is Class 1
+test[0,0]*classifier.weights_[0]  + test[0,1]*classifier.weights_[1] + classifier.bias_ # -0.817 ==> class 0
+test[1,0]*classifier.weights_[0]  + test[1,1]*classifier.weights_[1] + classifier.bias_ # 4.432 ==> class 1
+test[2,0]*classifier.weights_[0]  + test[2,1]*classifier.weights_[1] + classifier.bias_ # -0.021 ==> class 0
+test[3,0]*classifier.weights_[0]  + test[3,1]*classifier.weights_[1] + classifier.bias_ # 0.008 ==> class 1
+test[4,0]*classifier.weights_[0]  + test[4,1]*classifier.weights_[1] + classifier.bias_ # -0.015 ==> class 0
+test[5,0]*classifier.weights_[0]  + test[5,1]*classifier.weights_[1] + classifier.bias_ # 0.013 ==> class 1
+    
+# Predict the class of random points (when enable_centered_bias = False)
+x = 70
+y = 37
+classifier.weights_[0]*x + classifier.weights_[1]*y + classifier.bias_
+classifier.predict(np.array([[x,y]]))
+
+# loop version for seeing the individual points and predictions in test data
+for i in range(len(test)):
+    value = test[i,0]*classifier.weights_[0]  + test[i,1]*classifier.weights_[1] + classifier.bias_
+    print "Score: ", value, " ==> ", predictions[i]
