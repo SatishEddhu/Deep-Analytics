@@ -164,7 +164,7 @@ def model_function(features, targets):
 
     # Why return 'loss' separately when it is already a part of optimizer?
     #   evaluate() needs only - outputs_dict,loss [does not need optimizer since it is not learning]
-    #   fit() needs all three - outputs_dict,loss,optimizer
+    #   fit() needs only - loss,optimizer [does not need outputs_dict since it is not predicting]
     #   predict needs only - outputs_dict
     # So, 'loss' sent separately for use by evaluate()
     return outputs_dict, loss, optimizer 
