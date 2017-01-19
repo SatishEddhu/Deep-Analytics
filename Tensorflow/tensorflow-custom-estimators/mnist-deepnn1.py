@@ -19,24 +19,30 @@ y_validation = mnist.validation.labels
 x_test = mnist.test.images
 y_test = mnist.test.labels
 
-def model_function(features, targets, mode):
-    # don't need one-hot encoding since target is already in one-hot format
+
+# Hidden layers generally use sigmoid perceptrons
+# Output layer uses softmax for overall interpretability of all the 10 outputs
+def model_function(features, targets, mode):      
+    # 1st hidden layer
+    hlayer1 = layers.fully_connected(inputs=features, 
+                                     num_outputs=20, # 20 perceptrons in hidden layer 1
+                                     activation_fn=tf.sigmoid) # Sigmoid perceptrons
+    # 2nd hidden layer
+    hlayer2 = layers.fully_connected(inputs=hlayer1, 
+                                     num_outputs=10, # 10 perceptrons in hidden layer 2
+                                     activation_fn=tf.sigmoid) # Sigmoid perceptrons
     
-    # sigmoid also will work although the interpretability is difficult;
-    # The output with the max. value corresponds to the 'class' - whether sigmoid or softmax
-    outputs = layers.fully_connected(inputs=features, 
-                                     num_outputs=10, # 10 perceptrons for 10 numbers (0 to 9)
+    
+    outputs = layers.fully_connected(inputs=hlayer2, 
+                                     num_outputs=10, # 10 perceptrons in output layer for 10 numbers (0 to 9)
                                      activation_fn=None) # Use "None" as activation function specified in "softmax_cross_entropy" loss
-    # layer gives direct/plain outputs - linear activation. To compute losses, we use softmax on top of plain outputs
     
     
     # Calculate loss using cross-entropy error; also use the 'softmax' activation function
-    # softmax and cross-entropy combined together to handle log(0) and other border-case issues
     loss = losses.softmax_cross_entropy (outputs, targets)
     
     optimizer = layers.optimize_loss(
-                  loss=loss,
-                  # step is not an integer but a wrapper around it, just as Java has 'Integer' on top of 'int'
+                  loss=loss,                  
                   global_step=tf.contrib.framework.get_global_step(),
                   learning_rate=0.001,
                   optimizer="SGD")
@@ -50,9 +56,14 @@ def model_function(features, targets, mode):
     
 classifier = learn.Estimator(model_fn=model_function, model_dir='/home/algo/Algorithmica/tmp')
 
+
 classifier.fit(x=x_train, y=y_train, steps=1000, batch_size=100)
+# fully_connected = hidden layer 1; has 20 biases, 784 x 20 weights
+# fully_connected1 = hidden layer 2; has 10 biases, 20 x 10 weights
+# fully_connected2 = output layer; has 10 biases, 10 x 10 weights
 for var in classifier.get_variable_names()    :
-    print var, ": ", classifier.get_variable_value(var)
+    # print var, ": ", classifier.get_variable_value(var)
+    print var, ": ", classifier.get_variable_value(var).shape, " - ", classifier.get_variable_value(var)
 
 #evaluate the model using validation set
 results = classifier.evaluate(x=x_validation, y=y_validation, steps=1)

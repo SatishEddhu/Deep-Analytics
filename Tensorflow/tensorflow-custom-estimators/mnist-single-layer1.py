@@ -65,16 +65,26 @@ def model_function(features, targets, mode):
     # Return fractional values corresponding to the sigmoid perceptron outputs
     # Class of output (i.e., predicted number) corresponds to the perceptron returning the highest fractional value
     # Returning both fractional values and corresponding labels
+    # 2nd parameter of '1' for argmax() means row-wise - this is what we want. For column-wise, use '0'.
     return {'probs':outputs, 'labels':tf.argmax(outputs, 1)}, loss, optimizer 
     # return {'labels':outputs}, loss, optimizer 
 
     
 classifier = learn.Estimator(model_fn=model_function, model_dir='/home/algo/Algorithmica/tmp')
 
-# 784 x 10 weights involved and adjusted each time across 55000 inputs; hence takes a long time
-# Number of inputs for each step = 55000/1000 = 55 (stochastic mini-batch)
-# We must cover all inputs in an epoch. 1000 steps in an epoch. So,55 inputs in each step
-classifier.fit(x=x_train, y=y_train, steps=1000)
+# 784 x 10 weights involved and adjusted across 55000 inputs
+# batch_size = No. of samples to consider for single step of learning
+# step = one iteration
+# Suppose batch_size = 100, steps = 600. Across the 1st 550 steps, we would have covered all 55000 samples.
+# Then, in steps 551-600, we again repeat through the earlier samples, 100 each in step.
+# Suppose batch_size = 100, steps = 200. Now, we are covering only 20000 samples across all the steps. Algorithm
+# will still work although we have not considered every input.
+# If batch_size is less, we have to increase the #steps. The good combination of batch_size and steps is data
+# dependent. Must be tuned empirically.
+classifier.fit(x=x_train, y=y_train, steps=1000, batch_size=100)
+# Default batch_size = 1st dimension of x = 1st dimension of (55000x784) = 55000 = Batch gradient descent by default
+# So, below version will run for a long time
+# classifier.fit(x=x_train, y=y_train, steps=1000)
 for var in classifier.get_variable_names()    :
     print var, ": ", classifier.get_variable_value(var)
 
