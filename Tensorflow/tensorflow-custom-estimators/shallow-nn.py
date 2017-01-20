@@ -26,16 +26,13 @@ y_test = mnist.test.labels
 # Output layer uses softmax for overall interpretability of all the 10 outputs
 def model_function(features, targets, mode):      
     # 1st hidden layer
-    hlayer1 = layers.fully_connected(inputs=features, 
-                                     num_outputs=20, # 20 perceptrons in hidden layer 1
-                                     activation_fn=tf.sigmoid) # Sigmoid perceptrons
-    # 2nd hidden layer
-    hlayer2 = layers.fully_connected(inputs=hlayer1, 
-                                     num_outputs=10, # 10 perceptrons in hidden layer 2
+    hlayer = layers.fully_connected(inputs=features, 
+                                     num_outputs=50, 
                                      activation_fn=tf.sigmoid) # Sigmoid perceptrons
     
+    # Shallow neural network because there is only 1 hidden layer
     
-    outputs = layers.fully_connected(inputs=hlayer2, 
+    outputs = layers.fully_connected(inputs=hlayer, 
                                      num_outputs=10, # 10 perceptrons in output layer for 10 numbers (0 to 9)
                                      activation_fn=None) # Use "None" as activation function specified in "softmax_cross_entropy" loss
     
@@ -59,9 +56,6 @@ def model_function(features, targets, mode):
 classifier = learn.Estimator(model_fn=model_function, model_dir='/home/algo/Algorithmica/tmp')
 
 classifier.fit(x=x_train, y=y_train, steps=5000, batch_size=100)
-# fully_connected = hidden layer 1; has 20 biases, 784 x 20 weights
-# fully_connected1 = hidden layer 2; has 10 biases, 20 x 10 weights
-# fully_connected2 = output layer; has 10 biases, 10 x 10 weights
 for var in classifier.get_variable_names()    :
     # print var, ": ", classifier.get_variable_value(var)
     print var, ": ", classifier.get_variable_value(var).shape, " - ", classifier.get_variable_value(var)

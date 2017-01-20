@@ -5,6 +5,7 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 from tensorflow.examples.tutorials.mnist import input_data
+from sklearn import metrics
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
@@ -98,3 +99,14 @@ for key in sorted(results):
 predictions = classifier.predict(x_test, as_iterable=True)
 for i, p in enumerate(predictions):
    print("Prediction %s: %s, probs = %s" % (i+1, p["labels"], p["probs"]))
+
+# Compute the accuracy metrics
+# call with as_iterable=False to get all predictions together
+predictions = classifier.predict(x_test)
+metrics.accuracy_score(np.argmax(y_test, 1), predictions['labels'])
+
+# Predictions in tabular form
+a = np.bincount(predictions['labels'])
+b = np.nonzero(a)[0]
+zip(b,a[b])
+np.vstack((b,a[b])).T
